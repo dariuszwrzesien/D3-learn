@@ -35,9 +35,7 @@ function ready(data) {
         .range([area.height, 0]);
 
     var axis = d3.axisBottom(xScale)
-        .tickSizeInner(4)
-        .tickSizeOuter(20)
-        .tickPadding(3);
+        .tickPadding(0.1);
 
     drawArea(area);
     drawAxis(axis, area);
@@ -51,14 +49,12 @@ function filterData(data) {
 function baseDimension() {
     const margin = {top: 20, right: 10, bottom: 40, left: 10};
     const width = 500 - margin.left - margin.right;
-    const height = 400 - margin.top - margin.bottom;
-    const axisHeight = 30;
+    const height = 500 - margin.top - margin.bottom;
 
     return {
         margin: margin,
         width: width,
-        height: height,
-        axisHeight: axisHeight
+        height: height
     }
 }
 
@@ -79,7 +75,7 @@ function drawBars(chartData, xScale, yScale, area, config) {
         .attr('class', 'bar')
         .attr('width', xScale.bandwidth())
         .attr('height', value => yScale(value.y))
-        .attr('x', value => xScale(value.x))
+        .attr('x', value => area.margin.left + xScale(value.x))
         .attr('y', value => area.height - yScale(value.y))
         .style('fill', config.color);
 }
@@ -89,6 +85,12 @@ function drawAxis(axis, area) {
         .append('g')
         .attr('transform', `translate(${area.margin.left}, ${area.height})`)
         .call(axis)
+        .selectAll("text")
+        .attr("y", 0)
+        .attr("x", -135)
+        .attr("dy", ".35em")
+        .attr("transform", "rotate(-90)")
+        .style("text-anchor", "start");
 }
 
 
