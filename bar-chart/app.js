@@ -20,21 +20,28 @@ function ready(data) {
     const area = baseDimension();
 
     //Scales
+    const xScale = d3
+            .scaleBand()
+            .domain(values.map(obj => obj.x))
+            .range([0, area.width])
+            .paddingInner([0.1])
+            .paddingOuter([0.3])
+            .align([0.5]);
+
     const yMax = d3.max(values, value => value.y);
     const yScale = d3
         .scaleLinear()
         .domain([0, yMax])
-        .range([0, area.width])
+        .range([area.height, 0]);
 
-    const xMax = d3.extent(values, date => new Date(date.x))
-    const xScale = d3
-        .scaleLinear()
-        .domain(xMax)
-        .range([0, area.height])
+    var axis = d3.axisBottom(xScale)
+        .tickSizeInner(4)
+        .tickSizeOuter(20)
+        .tickPadding(3);
 
-
-    drawBase(area);
-    drawBars(values, xScale, yScale, config);
+    drawArea(area);
+    drawAxis(axis, area);
+    drawBars(values, xScale, yScale, area, config);
 }
 
 function filterData(data) {
@@ -42,18 +49,20 @@ function filterData(data) {
 }
 
 function baseDimension() {
-    const margin = {top: 40, right: 40, bottom: 40, left: 40};
-    const width = 400 - margin.left - margin.right;
-    const height = 500 - margin.top - margin.bottom;
+    const margin = {top: 20, right: 10, bottom: 40, left: 10};
+    const width = 500 - margin.left - margin.right;
+    const height = 400 - margin.top - margin.bottom;
+    const axisHeight = 30;
 
     return {
         margin: margin,
         width: width,
-        height: height
+        height: height,
+        axisHeight: axisHeight
     }
 }
 
-function drawBase(area) {
+function drawArea(area) {
     svg
         .attr('width', area.width + area.margin.left + area.margin.right)
         .attr('height', area.height + area.margin.top + area.margin.bottom)
@@ -61,17 +70,27 @@ function drawBase(area) {
         .attr('transform', `translate(${area.margin.left}, ${area.margin.top})`);
 }
 
-function drawBars(chartData, xScale, yScale, config) {
-    const bars = svg
+function drawBars(chartData, xScale, yScale, area, config) {
+     svg
         .selectAll('.bar')
         .data(chartData)
         .enter()
         .append('rect')
         .attr('class', 'bar')
-        .attr('x', value => yScale(value.y))
-        .attr('width', 20)
+        .attr('width', xScale.bandwidth())
         .attr('height', value => yScale(value.y))
-        .style('fill', config.color)
+        .attr('x', value => xScale(value.x))
+        .attr('y', value => area.height - yScale(value.y))
+        .style('fill', config.color);
 }
+
+function drawAxis(axis, area) {
+    svg
+        .append('g')
+        .attr('transform', `translate(${area.margin.left}, ${area.height})`)
+        .call(axis)
+}
+
+
 
 
