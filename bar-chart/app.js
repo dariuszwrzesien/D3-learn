@@ -13,7 +13,8 @@ function ready(data) {
     const config = {
         name: chartData.fullName,
         unit: chartData.unit,
-        color: chartData.color
+        color: chartData.color,
+        dateFormat: d3.timeFormat("%Y-%m-%d %H:%M %p")
     };
 
     const values = chartData.values;
@@ -35,6 +36,7 @@ function ready(data) {
         .range([area.height, 0]);
 
     const axisX = d3.axisBottom(xScale)
+        .tickFormat(d => config.dateFormat(new Date(d)))
         .tickPadding(0.1);
     const axisY = d3.axisLeft(yScale)
         .tickPadding(0.1);
@@ -49,7 +51,7 @@ function filterData(data) {
 }
 
 function baseDimension() {
-    const margin = {top: 70, right: 60, bottom: 90, left: 70};
+    const margin = {top: 120, right: 60, bottom: 90, left: 70};
     const width = 500 - margin.left - margin.right;
     const height = 500 - margin.top - margin.bottom;
 
@@ -64,8 +66,7 @@ function drawArea(area) {
     svg
         .attr('width', area.width + area.margin.left + area.margin.right)
         .attr('height', area.height + area.margin.top + area.margin.bottom)
-        .append('g')
-        .attr('transform', `translate(${area.margin.left}, ${area.margin.top})`);
+        .attr('transform', `translate(${area.margin.left}, ${area.margin.top})`)
 }
 
 function drawAxis(axisX, axisY, area) {
@@ -75,7 +76,7 @@ function drawAxis(axisX, axisY, area) {
         .call(axisX)
         .selectAll("text")
         .attr("y", 0)
-        .attr("x", -135)
+        .attr("x", -105)
         .attr("dy", ".35em")
         .attr("transform", "rotate(-90)")
         .style("text-anchor", "start");
