@@ -21,12 +21,12 @@ function ready(data) {
 
     //Scales
     const xScale = d3
-            .scaleBand()
-            .domain(values.map(obj => obj.x))
-            .range([0, area.width])
-            .paddingInner([0.1])
-            .paddingOuter([0.3])
-            .align([0.5]);
+        .scaleBand()
+        .domain(values.map(obj => obj.x))
+        .range([0, area.width])
+        .paddingInner([0.1])
+        .paddingOuter([0.3])
+        .align([0.5]);
 
     const yMax = d3.max(values, value => value.y);
     const yScale = d3
@@ -34,11 +34,13 @@ function ready(data) {
         .domain([0, yMax])
         .range([area.height, 0]);
 
-    var axis = d3.axisBottom(xScale)
+    const axisX = d3.axisBottom(xScale)
+        .tickPadding(0.1);
+    const axisY = d3.axisLeft(yScale)
         .tickPadding(0.1);
 
     drawArea(area);
-    drawAxis(axis, area);
+    drawAxis(axisX, axisY, area);
     drawBars(values, xScale, yScale, area, config);
 }
 
@@ -47,7 +49,7 @@ function filterData(data) {
 }
 
 function baseDimension() {
-    const margin = {top: 20, right: 10, bottom: 40, left: 10};
+    const margin = {top: 70, right: 60, bottom: 90, left: 70};
     const width = 500 - margin.left - margin.right;
     const height = 500 - margin.top - margin.bottom;
 
@@ -66,6 +68,29 @@ function drawArea(area) {
         .attr('transform', `translate(${area.margin.left}, ${area.margin.top})`);
 }
 
+function drawAxis(axisX, axisY, area) {
+    svg
+        .append('g')
+        .attr('transform', `translate(${area.margin.left}, ${area.height})`)
+        .call(axisX)
+        .selectAll("text")
+        .attr("y", 0)
+        .attr("x", -135)
+        .attr("dy", ".35em")
+        .attr("transform", "rotate(-90)")
+        .style("text-anchor", "start");
+
+    svg
+        .append("g")
+        .attr('transform', `translate(${area.margin.left}, 0)`)
+        .call(axisY)
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", "0.71em")
+        .attr("text-anchor", "end")
+}
+
 function drawBars(chartData, xScale, yScale, area, config) {
      svg
         .selectAll('.bar')
@@ -78,19 +103,6 @@ function drawBars(chartData, xScale, yScale, area, config) {
         .attr('x', value => area.margin.left + xScale(value.x))
         .attr('y', value => area.height - yScale(value.y))
         .style('fill', config.color);
-}
-
-function drawAxis(axis, area) {
-    svg
-        .append('g')
-        .attr('transform', `translate(${area.margin.left}, ${area.height})`)
-        .call(axis)
-        .selectAll("text")
-        .attr("y", 0)
-        .attr("x", -135)
-        .attr("dy", ".35em")
-        .attr("transform", "rotate(-90)")
-        .style("text-anchor", "start");
 }
 
 
