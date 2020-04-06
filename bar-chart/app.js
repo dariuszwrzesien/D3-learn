@@ -42,6 +42,7 @@ function ready(data) {
         .tickPadding(0.1);
 
     drawArea(area);
+    drawHeader(area);
     drawAxis(axisX, axisY, area);
     drawBars(values, xScale, yScale, area, config);
 }
@@ -69,6 +70,16 @@ function drawArea(area) {
         .attr('transform', `translate(${area.margin.left}, ${area.margin.top})`)
 }
 
+function drawHeader(area) {
+    const header = svg
+        .append('g')
+        .attr('class', 'chart-header')
+        .attr('transform', `translate(${area.width/2}, ${area.margin.top/2})`)
+        .append('text');
+
+    header.append('tspan').text('Bar chart');
+}
+
 function drawAxis(axisX, axisY, area) {
     svg
         .append('g')
@@ -94,6 +105,7 @@ function drawAxis(axisX, axisY, area) {
 
 function drawBars(chartData, xScale, yScale, area, config) {
      svg
+        .append("g")
         .selectAll('.bar')
         .data(chartData)
         .enter()
