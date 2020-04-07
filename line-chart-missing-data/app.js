@@ -79,8 +79,6 @@ function filterData(rData) {
         return curr;
     });
 
-    debugger
-
     return {
         key:data.key,
         fullName:data.fullName,
