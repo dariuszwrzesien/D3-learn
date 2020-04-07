@@ -74,7 +74,7 @@ function drawHeader(area) {
     const header = svg
         .append('g')
         .attr('class', 'chart-header')
-        .attr('transform', `translate(${area.width/2}, ${area.margin.top/2})`)
+        .attr('transform', `translate(${area.width/4}, ${area.margin.top/2})`)
         .append('text');
 
     header.append('tspan').text('Bar chart');
