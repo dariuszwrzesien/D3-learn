@@ -2,20 +2,86 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Charts examples</title>
+    <style>
+        body {
+            background-color: #aaaaaa;
+        }
+        .container {
+            margin-top: 100px;
+        }
+        .logo {
+            background-color: #ffffff;
+            width: 50px;
+            height: 50px;
+            margin: auto;
+            padding: 5px;
+            border-radius: .3em;
+        }
+        .numberlist {
+            width:450px;
+            height: 600px;
+            margin: auto;
+        }
+        .numberlist ol {
+            counter-reset: li;
+            list-style: none;
+            *list-style: decimal;
+            font: 15px 'trebuchet MS', 'lucida sans';
+            padding: 0;
+            margin-bottom: 4em;
+        }
+        .numberlist ol ol { margin: 0 0 0 2em }
+        .numberlist a {
+            position: relative;
+            display: block;
+            padding: .4em .4em .4em 2em;
+            *padding: .4em;
+            margin: .8em 0;
+            background: #FFF;
+            color: #444;
+            text-decoration: none;
+            -moz-border-radius: .3em;
+            -webkit-border-radius: .3em;
+            border-radius: .3em;
+        }
+        .numberlist a:hover {
+            background: #cbe7f8;
+            text-decoration:underline;
+        }
+        .numberlist a:before {
+            content: counter(li);
+            counter-increment: li;
+            position: absolute;
+            left: -1.3em;
+            top: 50%;
+            margin-top: -1.3em;
+            background: #87ceeb;
+            height: 2em;
+            width: 2em;
+            line-height: 2em;
+            border: .3em solid #fff;
+            text-align: center;
+            font-weight: bold;
+            -moz-border-radius: 2em;
+            -webkit-border-radius: 2em;
+            border-radius: 2em;
+            color:#FFF;
+        }
+    </style>
 </head>
 <body>
-    <div>
-        <a href="./bar-chart/index.html">Bar chart</a>
+<div class="container">
+    <div class="logo"><img src="d3.png" height="50" width="50"></div>
+    <div class="numberlist">
+        <ol>
+            <li><a href="./bar-chart/index.html">Bar chart</a></li>
+            <li><a href="./bar-chart-tooltip/index.html">Bar chart with tooltip</a></li>
+            <li><a href="./line-chart/index.html">Line chart</a></li>
+            <li><a href="./line-chart-missing-data/index.html">Line chart, missing data are shown as dash line</a></li>
+            <li><a href="./line-chart-missing-data/index.html">Combo chart</a></li>
+        </ol>
     </div>
-    <div>
-        <a href="./line-chart/index.html">Line chart</a>
-    </div>
-    <div>
-        <a href="./line-chart-missing-data/index.html">Line chart, missing data are shown as dash line</a>
-    </div>
-    <div>
-        <a href="./line-chart-missing-data/index.html">Combo chart</a>
-    </div>
+</div>
 </body>
 </html>

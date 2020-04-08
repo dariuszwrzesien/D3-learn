@@ -3,6 +3,7 @@ d3.json('data/chartData.json').then(result => {
     ready(result);
 });
 
+let config;
 const svg = d3
     .select('.bar-chart-container')
     .append('svg');
@@ -10,7 +11,7 @@ const svg = d3
 // Main function.
 function ready(data) {
     const chartData = filterData(data);
-    const config = {
+    config = {
         name: chartData.fullName,
         unit: chartData.unit,
         color: chartData.color,
@@ -31,7 +32,6 @@ function ready(data) {
         .align([0.5]);
 
     const yMax = d3.max(values, value => value.y);
-    const yMin = d3.min(values, value => value.y);
     const yScale = d3
         .scaleLinear()
         .domain([0, yMax])
@@ -118,30 +118,30 @@ function drawBars(chartData, xScale, yScale, area, config) {
         .style('fill', config.color);
 }
 
+function mouseover() {
+    const data = d3.select(this).data()[0];
+    d3.select('.tooltip')
+        .style('left', `${d3.event.clientX + 15}px`)
+        .style('top', `${d3.event.clientY}px`)
+        .style('opacity', 0.98);
+
+    d3.select('.tooltip').select('.tip-body').select('.y').html(`${config.name}: ${data.y}${config.unit}`);
+    d3.select('.tooltip').select('.tip-body').select('.x').html(`date: ${config.dateFormat(new Date(data.x))}`);
+}
+
+function mousemove() {
+    d3.select('.tooltip')
+        .style('left', `${d3.event.clientX + 15}px`)
+        .style('top', `${d3.event.clientY}px`)
+}
+
+function mouseout() {
+    d3.select('.tooltip')
+        .style('opacity', 0);
+}
+
 function addListeners() {
     d3.selectAll('.bar').on('mouseover', mouseover);
     d3.selectAll('.bar').on('mousemove', mousemove);
     d3.selectAll('.bar').on('mouseout', mouseout);
-
-
-    function mouseover() {
-        const data = d3.select(this).data()[0];
-        d3.select('.tooltip')
-            .style('left', `${d3.event.clientX + 15}px`)
-            .style('top', `${d3.event.clientY}px`)
-            .style('opacity', 0.98);
-
-        d3.select('.tooltip').select('.tip-body').html(`y: ${data.y}`);
-    }
-
-    function mousemove() {
-        d3.select('.tooltip')
-            .style('left', `${d3.event.clientX + 15}px`)
-            .style('top', `${d3.event.clientY}px`)
-    }
-
-    function mouseout() {
-        d3.select('.tooltip')
-            .style('opacity', 0);
-    }
 }
