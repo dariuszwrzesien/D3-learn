@@ -21,9 +21,10 @@ function ready(data) {
     const area = baseDimension();
 
     //Scales
+    const xDomain = values.map(obj => obj.x);
     const xScale = d3
         .scaleBand()
-        .domain(values.map(obj => obj.x))
+        .domain(xDomain)
         .range([0, area.width])
         .paddingInner([0.1])
         .paddingOuter([0.3])
@@ -33,7 +34,7 @@ function ready(data) {
     const yScale = d3
         .scaleLinear()
         .domain([0, yMax])
-        .range([area.height, 0]);
+        .range([area.height,  0]);
 
     const axisX = d3.axisBottom(xScale)
         .tickFormat(d => config.dateFormat(new Date(d)))
@@ -74,7 +75,7 @@ function drawHeader(area) {
     const header = svg
         .append('g')
         .attr('class', 'chart-header')
-        .attr('transform', `translate(${area.width/4}, ${area.margin.top/2})`)
+        .attr('transform', `translate(${(area.width + area.margin.left)/2}, ${area.margin.top/2})`)
         .append('text');
 
     header.append('tspan').text('Bar chart');
@@ -83,7 +84,7 @@ function drawHeader(area) {
 function drawAxis(axisX, axisY, area) {
     svg
         .append('g')
-        .attr('transform', `translate(${area.margin.left}, ${area.height})`)
+        .attr('transform', `translate(${area.margin.left}, ${area.height + 60})`)
         .call(axisX)
         .selectAll("text")
         .attr("y", 0)
@@ -94,30 +95,23 @@ function drawAxis(axisX, axisY, area) {
 
     svg
         .append("g")
-        .attr('transform', `translate(${area.margin.left}, 0)`)
+        .attr('transform', `translate(${area.margin.left}, 60)`)
         .call(axisY)
         .append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 6)
-        .attr("dy", "0.71em")
-        .attr("text-anchor", "end")
 }
 
 function drawBars(chartData, xScale, yScale, area, config) {
-     svg
+    svg
         .append("g")
+        .attr('transform', `translate(${area.margin.left}, 60)`)
         .selectAll('.bar')
         .data(chartData)
         .enter()
         .append('rect')
         .attr('class', 'bar')
         .attr('width', xScale.bandwidth())
-        .attr('height', value => yScale(value.y))
-        .attr('x', value => area.margin.left + xScale(value.x))
-        .attr('y', value => area.height - yScale(value.y))
+        .attr('height', value => yScale(0) - yScale(value.y))
+        .attr('x', value => xScale(value.x))
+        .attr('y', value => yScale(value.y))
         .style('fill', config.color);
 }
-
-
-
-
