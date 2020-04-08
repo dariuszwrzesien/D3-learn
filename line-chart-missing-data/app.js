@@ -63,14 +63,14 @@ function filterData(rData) {
     const values = [];
     const data = rData[1];
 
-    const parsed = data.values.map(d => {
+    const mapped = data.values.map(d => {
         return {
             x: new Date(d.x),
             y: d.y
         }
     });
 
-    parsed.reduce((prev, curr, i) => {
+    mapped.reduce((prev, curr, i) => {
         const prevDate = new Date(prev.x);
         const currDate = new Date(curr.x);
         (currDate - prevDate) <= MEASUREMENT_INTERVAL ?
