@@ -72,3 +72,12 @@ h4 {
 .tip-info:nth-of-type(even) {
   background: #e0e0e0;
 }
+
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+.focus circle {
+  fill: #FC3CC4;
+}

@@ -86,7 +86,30 @@ function ready(data) {
     drawBarAxis(axisXBar, axisYBar, area);
     drawBars(barChartValues, xBarScale, yBarScale, area, barChartConfig);
     drawLines(area, lineChartValues, filteredData, lineGenerator, lineChartConfig);
-    addListeners();
+    addRectOverlay(area);
+    svg.append("g")
+        .attr("class", "focus")
+        .style('opacity', 0)
+        .append("circle")
+        .attr('transform', `translate(${area.margin.left}, 50)`)
+        .attr("r", 5);
+    addBarListeners();
+    addLineListeners();
+
+    d3.selectAll('.overlay').on('mousemove', () => {
+        const bisectDate = d3.bisector(d => d.x).left;
+        const x0 = xLineScale.invert(d3.mouse(d3.event.currentTarget)[0]);
+        const i = bisectDate(lineChartValues, x0, 1);
+        const d0 = lineChartValues[i - 1];
+        const d1 = lineChartValues[i];
+        const d = x0 - d0.x > d1.x - x0 ? d1 : d0;
+        console.log('y', `${barChartConfig.name}: ${d.y}${barChartConfig.unit}`);
+        console.log('x', `${barChartConfig.dateFormat(new Date(d.x))}`);
+        d.x && d.y ?
+            d3.select('.focus').style('opacity', 0.98).attr("transform", "translate(" + xLineScale(d.x) + "," + yLineScale(d.y) + ")") :
+            d3.select('.focus').style('opacity', 0);
+
+    });
 }
 
 function filterData(data) {
@@ -228,6 +251,15 @@ function drawLines(area, values, filteredData, lineGenerator, config) {
         .style('stroke', config.color);
 }
 
+function addRectOverlay(area) {
+    svg
+        .append("rect")
+        .attr('transform', `translate(${area.margin.left}, 50)`)
+        .attr("class", "overlay")
+        .attr("width", area.width)
+        .attr("height", area.height)
+}
+
 function mouseoverBar() {
     const data = d3.select(this).data()[0];
     d3.select('.tooltip')
@@ -250,8 +282,36 @@ function mouseoutBar() {
         .style('opacity', 0);
 }
 
-function addListeners() {
-    d3.selectAll('.bar').on('mouseover', mouseoverBar);
-    d3.selectAll('.bar').on('mousemove', mousemoveBar);
-    d3.selectAll('.bar').on('mouseout', mouseoutBar);
+function mousemoveLine(data, xLineScale, yLineScale) {
+
+    // const biSect = d3.bisector(date => date.x).left;
+    const cor = d3.mouse(this)[0];
+
+    // const x0 = xLineScale.invert(d3.mouse(this)[0]),
+    //     i = d3.bisector(d => d.x).left,
+    //     d0 = data[i - 1],
+    //     d1 = data[i],
+    //     d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+    // debugger
+
+    // d3.select('.tooltip').attr("style", "left:" + (xLineScale(d.x) + 64) + "px;top:" + yLineScale(d.y) + "px;");
+    // d3.select('.tooltip').select('.tip-body').select(".y").text(`${barChartConfig.name}: ${d.y}${barChartConfig.unit}`);
+    // d3.select('.tooltip').select('.tip-body').select(".x").text(`${barChartConfig.dateFormat(new Date(d.x))}`);
+}
+
+function addBarListeners() {
+    // d3.selectAll('.bar').on('mouseover', mouseoverBar);
+    // d3.selectAll('.bar').on('mousemove', mousemoveBar);
+    // d3.selectAll('.bar').on('mouseout', mouseoutBar);
+}
+
+function addLineListeners() {
+    d3.selectAll('.overlay').on('mouseover', () =>  {
+        d3.select('.focus').style('opacity', 0.98);
+        d3.select('.tooltip').style('opacity', 0.98);
+    });
+    d3.selectAll('.overlay').on('mouseout', () => {
+        d3.select('.focus').style('opacity', 0);
+        d3.select('.tooltip').style('opacity', 0);
+    });
 }
