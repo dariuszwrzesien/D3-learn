@@ -3,8 +3,10 @@ d3.json('data/chartData.json').then(result => {
     ready(result);
 });
 
-const MEASUREMENT_INTERVAL = 600000;
+let barChartConfig;
+let lineChartConfig;
 
+const MEASUREMENT_INTERVAL = 600000;
 const svg = d3
     .select('.combo-chart-container')
     .append('svg');
@@ -12,57 +14,89 @@ const svg = d3
 // Main function.
 function ready(data) {
     const chartData = filterData(data);
-    const config = {
-        name: chartData.fullName,
-        unit: chartData.unit,
-        color: chartData.color,
+
+    barChartConfig = {
+        name: chartData.barChart.fullName,
+        unit: chartData.barChart.unit,
+        color: chartData.barChart.color,
         dateFormat: d3.timeFormat("%Y-%m-%d %H:%M %p")
     };
 
-    const values = chartData.values;
+    lineChartConfig = {
+        name: chartData.lineChart.fullName,
+        unit: chartData.lineChart.unit,
+        color: chartData.lineChart.color,
+        dateFormat: d3.timeFormat("%Y-%m-%d %H:%M %p")
+    };
+
+    const barChartValues = chartData.barChart.values;
+    const lineChartValues = chartData.lineChart.values;
     const area = baseDimension();
 
     //Scales
-    const extent = d3.extent(values, value => value.x);
-    const xScale = d3
+    //Bar
+    const xBarScale = d3.scaleBand()
+        .domain(barChartValues.map(d => d.x))
+        .range([0, area.width])
+        .paddingInner(0.5)
+        .paddingOuter(0.25);
+
+    const yBarScale = d3.scaleLinear()
+        .domain([0, d3.max(barChartValues, d => d.y)]).nice()
+        .range([area.height, 0]);
+
+    const axisXBar = d3.axisBottom(xBarScale)
+        .tickFormat(d => barChartConfig.dateFormat(new Date(d)))
+        .tickPadding(0.1);
+    const axisYBar = d3.axisRight(yBarScale)
+        .tickPadding(0.1);
+    //end of Bar
+
+    //Line
+    const extent = d3.extent(lineChartValues, value => value.x);
+    const xLineScale = d3
         .scaleTime()
         .domain(extent)
         .range([0, area.width]);
 
-    const yMax = d3.max(values, value => value.y);
-    const yScale = d3
+    const yLineMax = d3.max(lineChartValues, value => value.y);
+    const yLineScale = d3
         .scaleLinear()
-        .domain([0, yMax])
+        .domain([0, yLineMax])
         .range([area.height, 0]);
 
     const lineGenerator = d3
         .line()
         .defined(d => d.y !== null)
-        .x(d => xScale(d.x))
-        .y(d => yScale(d.y));
+        .x(d => xLineScale(d.x))
+        .y(d => yLineScale(d.y));
 
-    const filteredData = values.filter(lineGenerator.defined());
+    const filteredData = lineChartValues.filter(lineGenerator.defined());
 
-    const axisX = d3
-        .axisBottom(xScale)
-        .tickFormat(config.dateFormat)
-        .tickSizeOuter(0);
-
-    const axisY = d3
-        .axisLeft(yScale)
-        .ticks(5)
-        .tickSizeOuter(0)
-        .tickSizeInner(-area.width);
+    const axisXLine = d3.axisBottom(xLineScale)
+        .tickFormat(d => lineChartConfig.dateFormat(new Date(d)))
+        .tickPadding(0.1);
+    const axisYLine = d3.axisLeft(yLineScale)
+        .tickPadding(0.1);
+    //end of Line
 
     drawArea(area);
-    drawAxis(area, axisX, axisY);
-    drawLines(area, values, filteredData, lineGenerator, config)
+    drawHeader(area);
+    drawLineAxis(axisXLine, axisYLine, area);
+    drawBarAxis(axisXBar, axisYBar, area);
+    drawBars(barChartValues, xBarScale, yBarScale, area, barChartConfig);
+    drawLines(area, lineChartValues, filteredData, lineGenerator, lineChartConfig);
 }
 
-function filterData(rData) {
-    const values = [];
-    const data = rData[1];
+function filterData(data) {
+    return {
+        barChart: data[0],
+        lineChart: filterLineData(data[1])
+    }
+}
 
+function filterLineData(data){
+    const values = [];
     const mapped = data.values.map(d => {
         return {
             x: new Date(d.x),
@@ -90,7 +124,7 @@ function filterData(rData) {
 }
 
 function baseDimension() {
-    const margin = {top: 40, right: 40, bottom: 150, left: 60};
+    const margin = {top: 120, right: 60, bottom: 90, left: 70};
     const width = 500 - margin.left - margin.right;
     const height = 500 - margin.top - margin.bottom;
 
@@ -105,14 +139,22 @@ function drawArea(area) {
     svg
         .attr('width', area.width + area.margin.left + area.margin.right)
         .attr('height', area.height + area.margin.top + area.margin.bottom)
-        .attr('transform', `translate(${area.margin.left}, ${area.margin.top})`);
 }
 
-function drawAxis(area, axisX, axisY) {
+function drawHeader(area) {
+    const header = svg
+        .append('g')
+        .attr('class', 'chart-header')
+        .attr('transform', `translate(${(area.width + area.margin.left)/2}, ${area.margin.top/2})`)
+        .append('text');
+
+    header.append('tspan').text('Combo chart');
+}
+
+function drawLineAxis(axisX, axisY, area) {
     svg
         .append('g')
-        .attr('transform', `translate(${area.margin.left}, ${area.height + area.margin.top})`)
-        .attr('class', 'x axis')
+        .attr('transform', `translate(${area.margin.left}, ${area.height + 50})`)
         .call(axisX)
         .selectAll("text")
         .attr("y", 0)
@@ -122,16 +164,51 @@ function drawAxis(area, axisX, axisY) {
         .style("text-anchor", "start");
 
     svg
-        .append('g')
-        .attr('transform', `translate(${area.margin.left}, ${area.margin.top})`)
-        .attr('class', 'y axis')
-        .call(axisY);
+        .append("g")
+        .attr('transform', `translate(${area.margin.left}, 50)`)
+        .call(axisY)
+        .append("text")
+}
+
+function drawBarAxis(axisX, axisY, area) {
+    // svg
+    //     .append('g')
+    //     .attr('transform', `translate(${area.margin.left}, ${area.height + 50})`)
+    //     .call(axisX)
+    //     .selectAll("text")
+    //     .attr("y", 0)
+    //     .attr("x", -105)
+    //     .attr("dy", ".35em")
+    //     .attr("transform", "rotate(-90)")
+    //     .style("text-anchor", "start");
+
+    svg
+        .append("g")
+        .attr('transform', `translate(${area.width + area.margin.left}, 50)`)
+        .call(axisY)
+        .append("text")
+}
+
+function drawBars(chartData, xScale, yScale, area, config) {
+    svg
+        .append("g")
+        .attr('transform', `translate(${area.margin.left}, 50)`)
+        .selectAll('.bar')
+        .data(chartData)
+        .enter()
+        .append('rect')
+        .attr('class', 'bar')
+        .attr('width', xScale.bandwidth())
+        .attr('height', value => yScale(0) - yScale(value.y))
+        .attr('x', value => xScale(value.x))
+        .attr('y', value => yScale(value.y))
+        .style('fill', config.color);
 }
 
 function drawLines(area, values, filteredData, lineGenerator, config) {
     svg
         .append('g')
-        .attr('transform', `translate(${area.margin.left}, ${area.margin.top})`)
+        .attr('transform', `translate(${area.margin.left}, 50)`)
         .data([filteredData])
         .append('path')
         .attr('stroke-dasharray', '4')
@@ -141,7 +218,7 @@ function drawLines(area, values, filteredData, lineGenerator, config) {
 
     svg
         .append('g')
-        .attr('transform', `translate(${area.margin.left}, ${area.margin.top})`)
+        .attr('transform', `translate(${area.margin.left}, 50)`)
         .data([values])
         .append('path')
         .attr('class', 'line')
