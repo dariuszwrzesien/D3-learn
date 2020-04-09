@@ -38,8 +38,8 @@ function ready(data) {
     const xBarScale = d3.scaleBand()
         .domain(barChartValues.map(d => d.x))
         .range([0, area.width])
-        .paddingInner(0.5)
-        .paddingOuter(0.25);
+        .paddingInner(0.1)
+        .paddingOuter(0.1);
 
     const yBarScale = d3.scaleLinear()
         .domain([0, d3.max(barChartValues, d => d.y)]).nice()
@@ -86,6 +86,7 @@ function ready(data) {
     drawBarAxis(axisXBar, axisYBar, area);
     drawBars(barChartValues, xBarScale, yBarScale, area, barChartConfig);
     drawLines(area, lineChartValues, filteredData, lineGenerator, lineChartConfig);
+    addListeners();
 }
 
 function filterData(data) {
@@ -225,4 +226,32 @@ function drawLines(area, values, filteredData, lineGenerator, config) {
         .attr('d', lineGenerator)
         .style('fill', 'none')
         .style('stroke', config.color);
+}
+
+function mouseoverBar() {
+    const data = d3.select(this).data()[0];
+    d3.select('.tooltip')
+        .style('left', `${d3.event.clientX + 15}px`)
+        .style('top', `${d3.event.clientY}px`)
+        .style('opacity', 0.98);
+
+    d3.select('.tooltip').select('.tip-body').select('.y').html(`${barChartConfig.name}: ${data.y}${barChartConfig.unit}`);
+    d3.select('.tooltip').select('.tip-body').select('.x').html(`date: ${barChartConfig.dateFormat(new Date(data.x))}`);
+}
+
+function mousemoveBar() {
+    d3.select('.tooltip')
+        .style('left', `${d3.event.clientX + 15}px`)
+        .style('top', `${d3.event.clientY}px`)
+}
+
+function mouseoutBar() {
+    d3.select('.tooltip')
+        .style('opacity', 0);
+}
+
+function addListeners() {
+    d3.selectAll('.bar').on('mouseover', mouseoverBar);
+    d3.selectAll('.bar').on('mousemove', mousemoveBar);
+    d3.selectAll('.bar').on('mouseout', mouseoutBar);
 }
