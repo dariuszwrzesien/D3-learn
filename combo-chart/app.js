@@ -1,5 +1,5 @@
 // Load data.
-d3.json('data/chartData.json').then(result => {
+d3.json('data/chartData2.json').then(result => {
     ready(result);
 });
 
@@ -54,10 +54,16 @@ function ready(data) {
 
     //Line
     const extent = d3.extent(lineChartValues, value => value.x);
-    const xLineScale = d3
-        .scaleTime()
-        .domain(extent)
-        .range([0, area.width]);
+    // const xLineScale = d3
+    //     .scaleTime()
+    //     .domain(extent)
+    //     .range([0, area.width]);
+
+    const xLineScale = d3.scaleBand()
+        .domain(lineChartValues.map(d => d.x))
+        .range([0, area.width])
+        .paddingInner(0.1)
+        .paddingOuter(0.1);
 
     const yLineMax = d3.max(lineChartValues, value => value.y);
     const yLineScale = d3
@@ -103,35 +109,35 @@ function ready(data) {
 
     addLineListeners();
 
-    d3.selectAll('.overlay').on('mousemove', () => {
-        const bisectDate = d3.bisector(d => d.x).left;
-        const x0 = xLineScale.invert(d3.mouse(d3.event.currentTarget)[0]);
-        const i = bisectDate(lineChartValues, x0, 1);
-        const d0 = lineChartValues[i - 1];
-        const d1 = lineChartValues[i];
-        const d = x0 - d0.x > d1.x - x0 ? d1 : d0;
-
-        console.log('yLine', `${lineChartConfig.name}: ${d.y}${lineChartConfig.unit}`);
-        console.log('xLine', `${lineChartConfig.dateFormat(new Date(d.x))}`);
-
-        if (d.x && d.y) {
-            d3.select('.focusLine').style('opacity', 0.98).attr("transform", "translate(" + xLineScale(d.x) + "," + yLineScale(d.y) + ")");
-            d3.select('.tooltip').select('.tip-body').select('.y').html(`${lineChartConfig.name}: ${d.y}${lineChartConfig.unit}`);
-            d3.select('.tooltip').select('.tip-body').select('.x').html(`date: ${lineChartConfig.dateFormat(new Date(d.x))}`);
-        } else {
-            d3.select('.focus').style('opacity', 0);
-        }
-
-        const x00 = xBarScale.invert(d3.mouse(d3.event.currentTarget)[0]);
-        const j = bisectDate(barChartValues, x00, 1);
-        const d00 = barChartValues[j - 1];
-        const d11 = barChartValues[i];
-        const e = x00 - d00.x > d11.x - x00 ? d11 : d00;
-
-        debugger
-
-
-    });
+    // d3.selectAll('.overlay').on('mousemove', () => {
+    //     const bisectDate = d3.bisector(d => d.x).left;
+    //     const x0 = xLineScale.invert(d3.mouse(d3.event.currentTarget)[0]);
+    //     const i = bisectDate(lineChartValues, x0, 1);
+    //     const d0 = lineChartValues[i - 1];
+    //     const d1 = lineChartValues[i];
+    //     const d = x0 - d0.x > d1.x - x0 ? d1 : d0;
+    //
+    //     console.log('yLine', `${lineChartConfig.name}: ${d.y}${lineChartConfig.unit}`);
+    //     console.log('xLine', `${lineChartConfig.dateFormat(new Date(d.x))}`);
+    //
+    //     if (d.x && d.y) {
+    //         d3.select('.focusLine').style('opacity', 0.98).attr("transform", "translate(" + xLineScale(d.x) + "," + yLineScale(d.y) + ")");
+    //         d3.select('.tooltip').select('.tip-body').select('.y').html(`${lineChartConfig.name}: ${d.y}${lineChartConfig.unit}`);
+    //         d3.select('.tooltip').select('.tip-body').select('.x').html(`date: ${lineChartConfig.dateFormat(new Date(d.x))}`);
+    //     } else {
+    //         d3.select('.focus').style('opacity', 0);
+    //     }
+    //
+    //     const x00 = xBarScale.invert(d3.mouse(d3.event.currentTarget)[0]);
+    //     const j = bisectDate(barChartValues, x00, 1);
+    //     const d00 = barChartValues[j - 1];
+    //     const d11 = barChartValues[i];
+    //     const e = x00 - d00.x > d11.x - x00 ? d11 : d00;
+    //
+    //     debugger
+    //
+    //
+    // });
 }
 
 function filterData(data) {
@@ -171,7 +177,7 @@ function filterLineData(data){
 
 function baseDimension() {
     const margin = {top: 120, right: 60, bottom: 90, left: 70};
-    const width = 500 - margin.left - margin.right;
+    const width = 1000 - margin.left - margin.right;
     const height = 500 - margin.top - margin.bottom;
 
     return {
@@ -198,25 +204,6 @@ function drawHeader(area) {
 }
 
 function drawLineAxis(axisX, axisY, area) {
-    svg
-        .append('g')
-        .attr('transform', `translate(${area.margin.left}, ${area.height + 50})`)
-        .call(axisX)
-        .selectAll("text")
-        .attr("y", 0)
-        .attr("x", -105)
-        .attr("dy", ".35em")
-        .attr("transform", "rotate(-90)")
-        .style("text-anchor", "start");
-
-    svg
-        .append("g")
-        .attr('transform', `translate(${area.margin.left}, 50)`)
-        .call(axisY)
-        .append("text")
-}
-
-function drawBarAxis(axisX, axisY, area) {
     // svg
     //     .append('g')
     //     .attr('transform', `translate(${area.margin.left}, ${area.height + 50})`)
@@ -227,6 +214,25 @@ function drawBarAxis(axisX, axisY, area) {
     //     .attr("dy", ".35em")
     //     .attr("transform", "rotate(-90)")
     //     .style("text-anchor", "start");
+
+    svg
+        .append("g")
+        .attr('transform', `translate(${area.margin.left}, 50)`)
+        .call(axisY)
+        .append("text")
+}
+
+function drawBarAxis(axisX, axisY, area) {
+    svg
+        .append('g')
+        .attr('transform', `translate(${area.margin.left}, ${area.height + 50})`)
+        .call(axisX)
+        .selectAll("text")
+        .attr("y", 0)
+        .attr("x", -105)
+        .attr("dy", ".35em")
+        .attr("transform", "rotate(-90)")
+        .style("text-anchor", "start");
 
     svg
         .append("g")
