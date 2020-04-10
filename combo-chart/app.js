@@ -109,35 +109,67 @@ function ready(data) {
 
     addLineListeners();
 
-    // d3.selectAll('.overlay').on('mousemove', () => {
-    //     const bisectDate = d3.bisector(d => d.x).left;
-    //     const x0 = xLineScale.invert(d3.mouse(d3.event.currentTarget)[0]);
-    //     const i = bisectDate(lineChartValues, x0, 1);
-    //     const d0 = lineChartValues[i - 1];
-    //     const d1 = lineChartValues[i];
-    //     const d = x0 - d0.x > d1.x - x0 ? d1 : d0;
-    //
-    //     console.log('yLine', `${lineChartConfig.name}: ${d.y}${lineChartConfig.unit}`);
-    //     console.log('xLine', `${lineChartConfig.dateFormat(new Date(d.x))}`);
-    //
-    //     if (d.x && d.y) {
-    //         d3.select('.focusLine').style('opacity', 0.98).attr("transform", "translate(" + xLineScale(d.x) + "," + yLineScale(d.y) + ")");
-    //         d3.select('.tooltip').select('.tip-body').select('.y').html(`${lineChartConfig.name}: ${d.y}${lineChartConfig.unit}`);
-    //         d3.select('.tooltip').select('.tip-body').select('.x').html(`date: ${lineChartConfig.dateFormat(new Date(d.x))}`);
-    //     } else {
-    //         d3.select('.focus').style('opacity', 0);
-    //     }
-    //
-    //     const x00 = xBarScale.invert(d3.mouse(d3.event.currentTarget)[0]);
-    //     const j = bisectDate(barChartValues, x00, 1);
-    //     const d00 = barChartValues[j - 1];
-    //     const d11 = barChartValues[i];
-    //     const e = x00 - d00.x > d11.x - x00 ? d11 : d00;
-    //
-    //     debugger
-    //
-    //
-    // });
+    d3.selectAll('.overlay').on('mousemove', () => {
+        const bisectDate = d3.bisector(d => d.x).left;
+        // const x0 = xLineScale.invert(d3.mouse(d3.event.currentTarget)[0]);
+
+        var mouse = d3.mouse(d3.event.currentTarget);
+        var mouseX = mouse[0];
+        var mouseY = mouse[1];
+        var mousePos = mouseX - 15;
+        // var mouseAsDates = [x.invert(mousePos), x.invert(mouseY)];
+        // var index = bisectDate(data, mouseAsDates[0]);
+        // var d0 = lineChartValues[index];
+        // var pointPos = y(d0.y);
+
+        console.log('mouseX', mouseX)
+        console.log('mouseY', mouseY)
+
+        const index = Math.round(mouseX / xLineScale.step());
+        // const xDate = xLineScale.domain()[index];
+        const i = bisectDate(lineChartValues, xLineScale.domain()[0]);
+        const value = lineChartValues[i];
+
+        console.log('d3.event.x', d3.event.x)
+        console.log('index', index)
+        console.log('value', value)
+        debugger
+
+
+
+
+
+
+
+
+
+
+        // const i = bisectDate(lineChartValues, x0, 1);
+        // const d0 = lineChartValues[i - 1];
+        // const d1 = lineChartValues[i];
+        // const d = x0 - d0.x > d1.x - x0 ? d1 : d0;
+        //
+        // console.log('yLine', `${lineChartConfig.name}: ${d.y}${lineChartConfig.unit}`);
+        // console.log('xLine', `${lineChartConfig.dateFormat(new Date(d.x))}`);
+        //
+        // if (d.x && d.y) {
+        //     d3.select('.focusLine').style('opacity', 0.98).attr("transform", "translate(" + xLineScale(d.x) + "," + yLineScale(d.y) + ")");
+        //     d3.select('.tooltip').select('.tip-body').select('.y').html(`${lineChartConfig.name}: ${d.y}${lineChartConfig.unit}`);
+        //     d3.select('.tooltip').select('.tip-body').select('.x').html(`date: ${lineChartConfig.dateFormat(new Date(d.x))}`);
+        // } else {
+        //     d3.select('.focus').style('opacity', 0);
+        // }
+        //
+        // const x00 = xBarScale.invert(d3.mouse(d3.event.currentTarget)[0]);
+        // const j = bisectDate(barChartValues, x00, 1);
+        // const d00 = barChartValues[j - 1];
+        // const d11 = barChartValues[i];
+        // const e = x00 - d00.x > d11.x - x00 ? d11 : d00;
+        //
+        // debugger
+
+
+    });
 }
 
 function filterData(data) {
@@ -159,11 +191,18 @@ function filterLineData(data){
     mapped.reduce((prev, curr, i) => {
         const prevDate = new Date(prev.x);
         const currDate = new Date(curr.x);
-        (currDate - prevDate) <= MEASUREMENT_INTERVAL ?
-            values.push({x: currDate, y: curr.y}) :
+
+        if ((currDate - prevDate) <= MEASUREMENT_INTERVAL) {
+            i === 1 ? values.push({x: prevDate, y: prev.y}) : null
+            values.push({x: currDate, y: curr.y})
+        } else {
             values.push({x: new Date(currDate.getTime() + 1000), y: null});
+        }
+
         return curr;
     });
+
+    debugger
 
     return {
         key:data.key,
