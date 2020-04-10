@@ -32,9 +32,6 @@ function ready(data) {
     const barChartValues = chartData.barChart.values;
     const lineChartValues = chartData.lineChart.values;
 
-
-    debugger
-
     const area = baseDimension();
 
     //Scales
@@ -110,14 +107,19 @@ function ready(data) {
     d3.selectAll('.overlay').on('mousemove', () => {
         const bisectDate = d3.bisector(d => d.x).left;
         const mouseX = d3.mouse(d3.event.currentTarget)[0];
-        const number = Math.round(mouseX/ xLineScale.step());
+        const bandWidth = xLineScale.step();
+        const number = Math.round((mouseX - (bandWidth/2)) / bandWidth);
         const index = bisectDate(lineChartValues, xLineScale.domain()[number]);
-        const data = lineChartValues[index];
+        const lineData = lineChartValues[index];
+        const barData = barChartValues[index];
 
-        if (data.x && data.y) {
-            d3.select('.focusLine').style('opacity', 0.98).attr("transform", "translate(" + xLineScale(data.x) + "," + yLineScale(data.y) + ")");
-            d3.select('.tooltip').select('.tip-body').select('.y').html(`${lineChartConfig.name}: ${data.y}${lineChartConfig.unit}`);
-            d3.select('.tooltip').select('.tip-body').select('.x').html(`date: ${lineChartConfig.dateFormat(new Date(data.x))}`);
+        if (lineData.x && lineData.y) {
+            d3.select('.focusLine').style('opacity', 0.98).attr("transform", "translate(" + xLineScale(lineData.x) + "," + yLineScale(lineData.y) + ")");
+            d3.select('.tooltip').select('.tip-body').select('.yline').html(`${lineChartConfig.name}: ${lineData.y}${lineChartConfig.unit}`);
+            d3.select('.tooltip').select('.tip-body').select('.xLine').html(`date: ${lineChartConfig.dateFormat(new Date(lineData.x))}`);
+
+            d3.select('.tooltip').select('.tip-body').select('.yBar').html(`${barChartConfig.name}: ${barData.y}${barChartConfig.unit}`);
+            d3.select('.tooltip').select('.tip-body').select('.xBar').html(`date: ${barChartConfig.dateFormat(new Date(barData.x))}`);
         } else {
             d3.select('.focus').style('opacity', 0);
         }
