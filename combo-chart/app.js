@@ -88,11 +88,18 @@ function ready(data) {
     drawLines(area, lineChartValues, filteredData, lineGenerator, lineChartConfig);
     addRectOverlay(area);
     svg.append("g")
-        .attr("class", "focus")
+        .attr("class", "focusLine")
         .style('opacity', 0)
         .append("circle")
         .attr('transform', `translate(${area.margin.left}, 50)`)
-        .attr("r", 5);
+        .attr("r", 3);
+
+    svg.append("g")
+        .attr("class", "focusBar")
+        .style('opacity', 0)
+        .append("circle")
+        .attr('transform', `translate(${area.margin.left}, ${area.height + 50})`)
+        .attr("r", 3);
 
     addLineListeners();
 
@@ -108,12 +115,22 @@ function ready(data) {
         console.log('xLine', `${lineChartConfig.dateFormat(new Date(d.x))}`);
 
         if (d.x && d.y) {
-            d3.select('.focus').style('opacity', 0.98).attr("transform", "translate(" + xLineScale(d.x) + "," + yLineScale(d.y) + ")");
+            d3.select('.focusLine').style('opacity', 0.98).attr("transform", "translate(" + xLineScale(d.x) + "," + yLineScale(d.y) + ")");
             d3.select('.tooltip').select('.tip-body').select('.y').html(`${lineChartConfig.name}: ${d.y}${lineChartConfig.unit}`);
             d3.select('.tooltip').select('.tip-body').select('.x').html(`date: ${lineChartConfig.dateFormat(new Date(d.x))}`);
         } else {
             d3.select('.focus').style('opacity', 0);
         }
+
+        const x00 = xBarScale.invert(d3.mouse(d3.event.currentTarget)[0]);
+        const j = bisectDate(barChartValues, x00, 1);
+        const d00 = barChartValues[j - 1];
+        const d11 = barChartValues[i];
+        const e = x00 - d00.x > d11.x - x00 ? d11 : d00;
+
+        debugger
+
+
     });
 }
 
@@ -267,11 +284,13 @@ function addRectOverlay(area) {
 
 function addLineListeners() {
     d3.selectAll('.overlay').on('mouseover', () =>  {
-        d3.select('.focus').style('opacity', 0.98);
+        d3.select('.focusLine').style('opacity', 0.98);
+        d3.select('.focusBar').style('opacity', 0.98);
         d3.select('.tooltip').style('opacity', 0.98);
     });
     d3.selectAll('.overlay').on('mouseout', () => {
-        d3.select('.focus').style('opacity', 0);
+        d3.select('.focusLine').style('opacity', 0);
+        d3.select('.focusBar').style('opacity', 0);
         d3.select('.tooltip').style('opacity', 0);
     });
 }
