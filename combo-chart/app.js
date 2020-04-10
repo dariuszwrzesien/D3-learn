@@ -31,6 +31,10 @@ function ready(data) {
 
     const barChartValues = chartData.barChart.values;
     const lineChartValues = chartData.lineChart.values;
+
+
+    debugger
+
     const area = baseDimension();
 
     //Scales
@@ -53,12 +57,6 @@ function ready(data) {
     //end of Bar
 
     //Line
-    const extent = d3.extent(lineChartValues, value => value.x);
-    // const xLineScale = d3
-    //     .scaleTime()
-    //     .domain(extent)
-    //     .range([0, area.width]);
-
     const xLineScale = d3.scaleBand()
         .domain(lineChartValues.map(d => d.x))
         .range([0, area.width])
@@ -115,7 +113,7 @@ function ready(data) {
         const number = Math.round(mouseX/ xLineScale.step());
         const index = bisectDate(lineChartValues, xLineScale.domain()[number]);
         const data = lineChartValues[index];
-        
+
         if (data.x && data.y) {
             d3.select('.focusLine').style('opacity', 0.98).attr("transform", "translate(" + xLineScale(data.x) + "," + yLineScale(data.y) + ")");
             d3.select('.tooltip').select('.tip-body').select('.y').html(`${lineChartConfig.name}: ${data.y}${lineChartConfig.unit}`);
@@ -129,9 +127,27 @@ function ready(data) {
 
 function filterData(data) {
     return {
-        barChart: data[0],
+        barChart: filterBarData(data[0]),
         lineChart: filterLineData(data[1])
     }
+}
+
+function filterBarData(data) {
+    const values = data.values.map(d => {
+        return {
+            x: new Date(d.x),
+            y: d.y
+        }
+    });
+
+    return {
+        key:data.key,
+        fullName:data.fullName,
+        unit:data.unit,
+        order:+data.order,
+        color:data.color,
+        values:values
+    };
 }
 
 function filterLineData(data){
