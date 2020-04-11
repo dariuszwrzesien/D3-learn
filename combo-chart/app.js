@@ -75,6 +75,7 @@ function ready(data) {
     const filteredData = lineChartValues.filter(lineGenerator.defined());
 
     const axisXLine = d3.axisBottom(xLineScale)
+        .tickValues(xLineScale.domain().filter((d, i) => !(i % 5))) //<- filtruje wartości aby nie wyświetlać tick'a per Bar
         .tickFormat(d => lineChartConfig.dateFormat(new Date(d)))
         .tickPadding(0.1);
     const axisYLine = d3.axisLeft(yLineScale)
@@ -113,13 +114,15 @@ function ready(data) {
         const lineData = lineChartValues[index];
         const barData = barChartValues[index];
 
-        if (lineData.x && lineData.y) {
+        if ((lineData.x && lineData.y) || (barData.x && barData.y)) {
             d3.select('.focusLine').style('opacity', 0.98).attr("transform", "translate(" + xLineScale(lineData.x) + "," + yLineScale(lineData.y) + ")");
             d3.select('.tooltip').select('.tip-body').select('.yline').html(`${lineChartConfig.name}: ${lineData.y}${lineChartConfig.unit}`);
             d3.select('.tooltip').select('.tip-body').select('.xLine').html(`date: ${lineChartConfig.dateFormat(new Date(lineData.x))}`);
 
             d3.select('.tooltip').select('.tip-body').select('.yBar').html(`${barChartConfig.name}: ${barData.y}${barChartConfig.unit}`);
             d3.select('.tooltip').select('.tip-body').select('.xBar').html(`date: ${barChartConfig.dateFormat(new Date(barData.x))}`);
+            //highlight
+            d3.selectAll('.bar').style('fill', `${barChartConfig.color}`).filter((d, i) => i === index).style('fill', '#F00')
         } else {
             d3.select('.focus').style('opacity', 0);
         }
@@ -214,25 +217,6 @@ function drawHeader(area) {
 }
 
 function drawLineAxis(axisX, axisY, area) {
-    // svg
-    //     .append('g')
-    //     .attr('transform', `translate(${area.margin.left}, ${area.height + 50})`)
-    //     .call(axisX)
-    //     .selectAll("text")
-    //     .attr("y", 0)
-    //     .attr("x", -105)
-    //     .attr("dy", ".35em")
-    //     .attr("transform", "rotate(-90)")
-    //     .style("text-anchor", "start");
-
-    svg
-        .append("g")
-        .attr('transform', `translate(${area.margin.left}, 50)`)
-        .call(axisY)
-        .append("text")
-}
-
-function drawBarAxis(axisX, axisY, area) {
     svg
         .append('g')
         .attr('transform', `translate(${area.margin.left}, ${area.height + 50})`)
@@ -243,6 +227,25 @@ function drawBarAxis(axisX, axisY, area) {
         .attr("dy", ".35em")
         .attr("transform", "rotate(-90)")
         .style("text-anchor", "start");
+
+    svg
+        .append("g")
+        .attr('transform', `translate(${area.margin.left}, 50)`)
+        .call(axisY)
+        .append("text")
+}
+
+function drawBarAxis(axisX, axisY, area) {
+    // svg
+    //     .append('g')
+    //     .attr('transform', `translate(${area.margin.left}, ${area.height + 50})`)
+    //     .call(axisX)
+    //     .selectAll("text")
+    //     .attr("y", 0)
+    //     .attr("x", -105)
+    //     .attr("dy", ".35em")
+    //     .attr("transform", "rotate(-90)")
+    //     .style("text-anchor", "start");
 
     svg
         .append("g")
