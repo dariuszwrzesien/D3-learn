@@ -115,7 +115,7 @@ function ready(data) {
             d3.select('.tooltip').select('.tip-body').select('.yBar').html(`${barChartConfig.name}: ${barData.y}${barChartConfig.unit}`);
             d3.select('.tooltip').select('.tip-body').select('.xBar').html(`date: ${barChartConfig.dateFormat(new Date(barData.x))}`);
             //highlight
-            d3.selectAll('.bar').style('fill', `${barChartConfig.color}`).filter((d, i) => i === index).style('fill', '#FF0D6DF6')
+            d3.selectAll('.bar').style('fill', `${barChartConfig.color}`).filter((d, i) => i === index).style('fill', '#0d05ff')
         } else {
             d3.select('.focus').style('opacity', 0);
         }
