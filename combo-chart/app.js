@@ -96,13 +96,6 @@ function ready(data) {
         .attr('transform', `translate(${area.margin.left + 7}, 50)`)
         .attr("r", 3);
 
-    svg.append("g")
-        .attr("class", "focusBar")
-        .style('opacity', 0)
-        .append("circle")
-        .attr('transform', `translate(${area.margin.left}, ${area.height + 50})`)
-        .attr("r", 3);
-
     addLineListeners();
 
     d3.selectAll('.overlay').on('mousemove', () => {
@@ -122,7 +115,7 @@ function ready(data) {
             d3.select('.tooltip').select('.tip-body').select('.yBar').html(`${barChartConfig.name}: ${barData.y}${barChartConfig.unit}`);
             d3.select('.tooltip').select('.tip-body').select('.xBar').html(`date: ${barChartConfig.dateFormat(new Date(barData.x))}`);
             //highlight
-            d3.selectAll('.bar').style('fill', `${barChartConfig.color}`).filter((d, i) => i === index).style('fill', '#F00')
+            d3.selectAll('.bar').style('fill', `${barChartConfig.color}`).filter((d, i) => i === index).style('fill', '#FF0D6DF6')
         } else {
             d3.select('.focus').style('opacity', 0);
         }
@@ -304,12 +297,10 @@ function addRectOverlay(area) {
 function addLineListeners() {
     d3.selectAll('.overlay').on('mouseover', () =>  {
         d3.select('.focusLine').style('opacity', 0.98);
-        d3.select('.focusBar').style('opacity', 0.98);
         d3.select('.tooltip').style('opacity', 0.98);
     });
     d3.selectAll('.overlay').on('mouseout', () => {
         d3.select('.focusLine').style('opacity', 0);
-        d3.select('.focusBar').style('opacity', 0);
         d3.select('.tooltip').style('opacity', 0);
     });
 }
