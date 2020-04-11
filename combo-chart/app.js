@@ -93,7 +93,7 @@ function ready(data) {
         .attr("class", "focusLine")
         .style('opacity', 0)
         .append("circle")
-        .attr('transform', `translate(${area.margin.left}, 50)`)
+        .attr('transform', `translate(${area.margin.left + 7}, 50)`)
         .attr("r", 3);
 
     svg.append("g")
@@ -273,7 +273,7 @@ function drawBars(chartData, xScale, yScale, area, config) {
 function drawLines(area, values, filteredData, lineGenerator, config) {
     svg
         .append('g')
-        .attr('transform', `translate(${area.margin.left}, 50)`)
+        .attr('transform', `translate(${area.margin.left + 7}, 50)`)
         .data([filteredData])
         .append('path')
         .attr('stroke-dasharray', '4')
@@ -283,7 +283,7 @@ function drawLines(area, values, filteredData, lineGenerator, config) {
 
     svg
         .append('g')
-        .attr('transform', `translate(${area.margin.left}, 50)`)
+        .attr('transform', `translate(${area.margin.left + 7}, 50)`)
         .data([values])
         .append('path')
         .attr('class', 'line')
